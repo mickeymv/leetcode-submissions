@@ -8,37 +8,27 @@
  * }
  */
 public class Solution {
-    
-    private HashMap<Integer, LinkedList> map = new HashMap<Integer, LinkedList>();
-    
     public List<List<Integer>> levelOrder(TreeNode root) {
-        helper(root, 1);
-        List list = new LinkedList();
+        List<List<Integer>> listOfLevels = new ArrayList<List<Integer>>();
+        if (root == null) return  listOfLevels;
         
-        for(int i=1;;i++) {
-            if(map.containsKey(i)) {
-                list.add(map.get(i));
-            } else {
-                break;
+        Queue<TreeNode> q = new LinkedList<>();
+        
+        q.offer(root);
+        
+        while(!q.isEmpty()) {
+            int levelSize = q.size();
+            List<Integer> levelList = new ArrayList<>();;
+            while(levelSize>0) {
+                TreeNode node = q.poll();
+                levelList.add(node.val);
+                if(node.left!=null) q.offer(node.left);
+                if(node.right!=null) q.offer(node.right);
+                levelSize--;
             }
+            listOfLevels.add(levelList);
         }
         
-        return list;
-    }
-    
-    private void helper(TreeNode node, int level) {
-        if (node == null) {
-            return;
-        }
-        LinkedList list = null;
-        if(map.containsKey(level)) {
-            list = map.get(level);
-        } else {
-            list = new LinkedList();
-        }
-        list.add(node.val);
-        map.put(level,list);
-        helper(node.left,level+1);
-        helper(node.right,level+1);
+        return  listOfLevels;
     }
 }
