@@ -4,28 +4,29 @@
  *     int val;
  *     TreeNode left;
  *     TreeNode right;
- *     TreeNode(int x) { val = x; }
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
  * }
  */
-public class Solution {
+class Solution {
     public List<Integer> inorderTraversal(TreeNode root) {
-        List<Integer> list = new ArrayList<Integer>();
-        helper(root, list);
-        return list;
-    }
-    
-    private void helper(TreeNode node, List<Integer> list) {
-        if(node == null) return;
-        Stack<TreeNode> s = new Stack<>();
-        
-        while(node!=null || !s.isEmpty()) {
+        List<Integer> list = new ArrayList<>();
+        TreeNode node = root;
+        Stack<TreeNode> stack = new Stack<>();
+        while(node!=null || !stack.isEmpty()) {
             while(node!=null) {
-                s.push(node);
+                stack.push(node);
                 node = node.left;
             }
-            node = s.pop();
-            list.add(node.val);
-            node = node.right;
+            TreeNode current = stack.pop();
+            list.add(current.val);
+            node=current.right;
         }
+        return list;
     }
 }
