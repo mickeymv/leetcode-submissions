@@ -1,70 +1,79 @@
-public class LRUCache {
+class Node {
+    int key, val;
+    Node left, right;
 
-    static final class Node {
-        int key,value;
-        Node pre,next;
-        public Node(int key, int value) {
-            this.key=key;
-            this.value=value;
-            pre=next=null;
-        }
+    public Node(int key, int value) {
+        this.key = key;
+        this.val = value;
     }
-    
-    private Node head = new Node(0,-1), tail = new Node(0,-1);
-    
-    private HashMap<Integer, Node> map = new HashMap<Integer, Node>();
+}
+
+class LRUCache {
 
     int capacity;
+    Node lru = new Node(-1,-1), mru = new Node(-1,-1);
+    Map<Integer, Node> keysToNodes = new HashMap<>();
 
     public LRUCache(int capacity) {
         this.capacity = capacity;
-        head.next = tail;
-        tail.pre = head;
+        lru.right = mru;
+        mru.left = lru;
     }
     
     public int get(int key) {
-        if(map.containsKey(key)){
-            Node node = map.get(key);
-            addToTail(node);
-            return node.value;
-        } else {
+        if(!keysToNodes.containsKey(key)) {
             return -1;
         }
+
+        Node node = keysToNodes.get(key);
+        moveToMru(node);
+        return node.val;
     }
-    
-    private void addToTail(Node node) {
-        Node temp = node.pre;
-        node.pre.next = node.next;
-        node.next.pre = temp;
-        
-        node.pre = tail.pre;
-        tail.pre.next = node;
-        node.next = tail;
-        tail.pre = node;
+
+    private void moveToMru(Node node) {
+        //make sure the nodes left and right nodes
+        //point to each other 
+
+        node.left.right = node.right;
+        node.right.left = node.left;
+
+        addToMru(node);
+    }
+
+    private void addToMru(Node node) {
+        //ensure that the mru points to the new node 
+        //and that previousMru points to the new node 
+
+        Node previousMru = mru.left;
+        mru.left = node;
+        previousMru.right = node;
+        node.left = previousMru;
+        node.right = mru;
     }
     
     public void put(int key, int value) {
-        if(map.containsKey(key)) {
-            Node node = map.get(key);
-            node.value = value;
-            map.put(key,node);
-            addToTail(node);
+        if(!keysToNodes.containsKey(key)) {
+            if (capacity == keysToNodes.size()) {
+                removeLru();
+            }
+            Node node = new Node(key, value);
+            keysToNodes.put(key, node);
+            addToMru(node);
             return;
-        } else if (map.size() == capacity) {
-            deleteHead();
         }
-        Node node = new Node(key,value);
-        node.pre = tail.pre;
-        node.next = tail;
-        tail.pre=node;
-        map.put(key,node);
-        addToTail(node);
+
+        Node node = keysToNodes.get(key);
+        node.val = value;
+        moveToMru(node);
     }
-    
-    private void deleteHead() {
-        map.remove(head.next.key);
-        head.next = head.next.next;
-        head.next.pre = head;
+
+    private void removeLru() {
+        //ensure lru points to correct node after removal 
+
+        Node previousLru = lru.right;
+        lru.right = previousLru.right;
+        previousLru.right.left = lru;
+        keysToNodes.remove(previousLru.key);
     }
 }
 
